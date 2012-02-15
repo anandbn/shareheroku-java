@@ -1,17 +1,9 @@
 package controllers;
 
-import com.dmurph.tracking.AnalyticsConfigData;
-import com.dmurph.tracking.JGoogleAnalyticsTracker;
 import com.google.gson.Gson;
-import com.heroku.api.App;
-import com.heroku.api.HerokuAPI;
-import com.heroku.api.connection.HttpClientConnection;
-import com.heroku.api.request.login.BasicAuthLogin;
 
-import helpers.EmailHelper;
-import helpers.HerokuAppSharingHelper;
+import helpers.AppCloneRequest;
 import helpers.JedisPoolFactory;
-import play.libs.F;
 import play.mvc.*;
 import play.data.validation.Error;
 import redis.clients.jedis.Jedis;
@@ -33,11 +25,11 @@ public class Application extends Controller {
 
 		 JedisPool pool = poolFactory.getPool();
 	     Jedis jedis = pool.getResource();
-	        
-	      jedis.rpush("queue", String.format("%s|%s",emailAddress,gitUrl));      
+	      AppCloneRequest request = new AppCloneRequest(emailAddress,gitUrl);
+	      String msg = new Gson().toJson(request) ;
+	      jedis.rpush("queue",msg);     
+	      System.out.println(String.format("[Requested By:%s] - %s : Message to Queue=%s",emailAddress,"CLNREQ",msg));
 	      pool.returnResource(jedis);
-       
-    	System.out.println(String.format(">>>>>>>>>>Received shareApp call > Email%s,gitUrl:%s",emailAddress,gitUrl));
-    }
-
+	      render();
+     }
 }
