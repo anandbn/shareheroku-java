@@ -56,18 +56,19 @@ public class HerokuAppSharingHelper extends Job<App> {
             if (!app.getCreateStatus().equals("complete")) {
                 throw new RuntimeException("Could not create the Heroku app");
             }
-
+            log("Got API Key for super User");
             // write the public key to a file
             String fakeUserHome = System.getProperty("java.io.tmpdir") + File.separator + UUID.randomUUID().toString();
 
             File fakeUserHomeSshDir = new File(fakeUserHome + File.separator + ".ssh");
             fakeUserHomeSshDir.mkdirs();
-
+            log(String.format("Created tmp directory at %s",fakeUserHomeSshDir.getAbsolutePath()));
             JSch jsch = new JSch();
             KeyPair keyPair = KeyPair.genKeyPair(jsch, KeyPair.RSA);
             keyPair.writePrivateKey(fakeUserHomeSshDir.getAbsolutePath() + File.separator + "id_rsa");
             keyPair.writePublicKey(fakeUserHomeSshDir.getAbsolutePath() + File.separator + "id_rsa.pub", SSH_KEY_COMMENT);
-
+            log(String.format("Wrote private/public key pair to file system"));
+            
             ByteArrayOutputStream publicKeyOutputStream = new ByteArrayOutputStream();
             keyPair.writePublicKey(publicKeyOutputStream, SSH_KEY_COMMENT);
             publicKeyOutputStream.close();
@@ -80,6 +81,7 @@ public class HerokuAppSharingHelper extends Job<App> {
             // add the key pair to ${HEROKU_USERNAME}
             KeyAdd keyAdd = new KeyAdd(sshPublicKey);
             Unit keyAddResponse = herokuConnection.execute(keyAdd);
+            log(String.format("Added Keys to account"));
 
             if (keyAddResponse == null) {
                 throw new RuntimeException("Could not add an ssh key to the user");
@@ -104,12 +106,14 @@ public class HerokuAppSharingHelper extends Job<App> {
                 gitRepo = new Git(repository);
                 gitRepo.pull().call();
             }
+            log(String.format("Cloned Git Repo"));
 
             // git push the heroku repo
 
             gitRepo.getRepository().getFS().setUserHome(new File(fakeUserHome));
             gitRepo.push().setRemote(app.getGitUrl()).call();
 
+            log(String.format("Pushed to Heroku remote Git repo:%s",app.getGitUrl()));
             // share the app with the provided email
             SharingAdd sharingAdd = new SharingAdd(app.getName(), emailAddress);
             Unit sharingAddResponse = herokuConnection.execute(sharingAdd);
@@ -118,9 +122,11 @@ public class HerokuAppSharingHelper extends Job<App> {
                 throw new RuntimeException("Could not add " + emailAddress + " as a collaborator");
             }
 
+            log(String.format("Added '%s' as collaborator",emailAddress));
             // transfer the app to the provided email
             SharingTransfer sharingTransfer = new SharingTransfer(app.getName(), emailAddress);
             Unit sharingTransferResponse = herokuConnection.execute(sharingTransfer);
+            log(String.format("Made '%s' the owner",emailAddress));
 
             if (sharingTransferResponse == null) {
                 throw new RuntimeException("Could not transfer the app to " + emailAddress);
@@ -129,6 +135,7 @@ public class HerokuAppSharingHelper extends Job<App> {
             // remove ${HEROKU_USERNAME} as collaborator
             SharingRemove sharingRemove = new SharingRemove(app.getName(), System.getenv("HEROKU_USERNAME"));
             Unit sharingRemoveResponse = herokuConnection.execute(sharingRemove);
+            log(String.format("Removed '%s' from collaborators",System.getenv("HEROKU_USERNAME")));
 
             if (sharingRemoveResponse == null) {
                 throw new RuntimeException("Could remove " + System.getenv("HEROKU_USERNAME") + " from the app");
@@ -141,29 +148,40 @@ public class HerokuAppSharingHelper extends Job<App> {
             if (keyRemoveResponse == null) {
                 throw new RuntimeException("Could not remove ssh key");
             }
+            log(String.format("Removed public keys"));
 
             // cleanup the fakeUserHome
             new File(fakeUserHome).delete();
+            log(String.format("Deleted Temporary file system"));
 
             return app;
 
         } catch (IOException e) {
+        	log("Exception when sharing an app:"+e.getMessage());
             throw new RuntimeException(e);
         } catch (URISyntaxException e) {
+           	log("Exception when sharing an app:"+e.getMessage());
             throw new RuntimeException(e);
         } catch (InvalidConfigurationException e) {
+           	log("Exception when sharing an app:"+e.getMessage());
             throw new RuntimeException(e);
         } catch (InvalidRemoteException e) {
+           	log("Exception when sharing an app:"+e.getMessage());
             throw new RuntimeException(e);
         } catch (WrongRepositoryStateException e) {
+           	log("Exception when sharing an app:"+e.getMessage());
             throw new RuntimeException(e);
         } catch (CanceledException e) {
+           	log("Exception when sharing an app:"+e.getMessage());
             throw new RuntimeException(e);
         } catch (RefNotFoundException e) {
+           	log("Exception when sharing an app:"+e.getMessage());
             throw new RuntimeException(e);
         } catch (DetachedHeadException e) {
+           	log("Exception when sharing an app:"+e.getMessage());
             throw new RuntimeException(e);
         } catch (JSchException e) {
+           	log("Exception when sharing an app:"+e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -171,5 +189,9 @@ public class HerokuAppSharingHelper extends Job<App> {
     @Override
     public void onException(Throwable e) {
         this.exception = e;
+    }
+    
+    private void log(String logMsg){
+    	System.out.println(String.format(">>>>>>>>>>>%s",logMsg));
     }
 }

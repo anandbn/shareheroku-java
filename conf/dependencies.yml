@@ -7,7 +7,7 @@ require:
     - com.heroku.api -> heroku-api 0.2
     - com.heroku.api -> heroku-json-jackson 0.2
     - com.heroku.api -> heroku-http-apache 0.2
-
+    - redis.clients -> jedis 2.0.0
 repositories:
     - jgit-repository:
         type: iBiblio

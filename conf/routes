@@ -5,7 +5,9 @@
 # Home page
 GET     /                                       Application.index
 
-POST    /                                       Application.shareApp
+GET    /appGetStarted                           Application.appGetStarted
+
+POST    /shareApp                               Application.shareApp
 
 # Ignore favicon requests
 GET     /favicon.ico                            404
