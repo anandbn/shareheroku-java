@@ -1,10 +1,13 @@
 package models;
 
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 import play.db.jpa.Model;
-
+@Entity
+@Table(name="clone_request")
 public class AppCloneRequest  extends Model{
 	@Id @GeneratedValue
 	public long reqId;
