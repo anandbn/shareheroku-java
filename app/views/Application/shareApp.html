@@ -1,7 +1,15 @@
 #{extends 'main.html' /}
 #{set title:'Caterpillar - Heroku Developer workshop' /}
-<div class="alert alert-success">
-You have successfully created a Heroku application:<b>[app name]</b>. You can check out the application at Application name 
+
+<div class="alert alert-info">
+Your app is being "created". Stay Tuned.<br/>
+</div>
+<div class="alert alert-info">
+You have successfully created a Heroku application:<b>${app.name}</b>. You can check out the application at Application name 
 <a href="#" target="_blank">[app name]</a>:<br/>
+</div>
+
+<div class="alert alert-info">
+Git URL: ${app.appGitUrl}<br/>
 </div>
 

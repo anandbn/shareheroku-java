@@ -20,7 +20,7 @@ public class JedisPoolFactory {
             config.testOnBorrow = true;
             Matcher matcher = HEROKU_REDISTOGO_URL_PATTERN.matcher(System.getenv("REDISTOGO_URL"));
             matcher.matches();
-            JedisPoolFactory.pool = new JedisPool(config, matcher.group(3), Integer.parseInt(matcher.group(4)), Protocol.DEFAULT_TIMEOUT, matcher.group(2));
+            JedisPoolFactory.pool = new JedisPool( config, matcher.group(3), Integer.parseInt(matcher.group(4)), Protocol.DEFAULT_TIMEOUT, matcher.group(2));
         }
         return JedisPoolFactory.pool;
     }

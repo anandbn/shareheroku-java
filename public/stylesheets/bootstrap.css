@@ -728,7 +728,7 @@ select[readonly],
 textarea[readonly] {
   background-color: #f5f5f5;
   border-color: #ddd;
-  cursor: not-allowed;
+  /*cursor: not-allowed;*/
 }
 .control-group.warning > label, .control-group.warning .help-block, .control-group.warning .help-inline {
   color: #c09853;

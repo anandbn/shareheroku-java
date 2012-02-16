@@ -37,9 +37,42 @@ label.app {
     };
 
     function submitForm(appName) {
+       /*
+       if($("#emailAddress").val().length==0){
+       	alert("Email is required. Please enter a valid email address");
+       	return false;
+       }
        $("#gitUrl").val(apps[appName]);
        $("#theForm").submit();
+       */
        
+       if($("#emailAddress").val().length==0){
+       	alert("Email is required. Please enter a valid email address");
+       	return false;
+       }
+       var clonedApp;
+       $.ajax("/shareApp", {
+                type: 'POST',
+                data: {
+                    emailAddress: $('#emailAddress').val(),
+                    gitUrl: apps[appName]
+                },
+                success: function(data, textStatus, jqXHR) {
+					
+					onShareCreate(data);
+                    
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                	alert('Error Submitting Request');
+                }
+
+            });
+ 	}
+ 	
+ 	function onShareCreate(clonedApp){
+ 		var stsMsg = clonedApp.status;
+ 		top.location="/appGetStarted?appId="+clonedApp.id;	
+ 	
  	}
 </script>
 #{/set}

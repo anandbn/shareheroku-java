@@ -6,7 +6,7 @@
 GET     /                                       Application.index
 
 GET    /appGetStarted                           Application.appGetStarted
-
+GET    /cloneReqStatus							Application.cloneReqStatus
 POST    /shareApp                               Application.shareApp
 
 # Ignore favicon requests
